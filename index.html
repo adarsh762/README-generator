@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>readme.forge — AI Project README Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">◆</span>
+    <span class="brand-text">readme<span class="brand-dim">.forge</span></span>
+    <span class="brand-emoji" id="brand-emoji">✨</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-meta">Paste your project, get a real README — powered by Claude ✨</span>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle light/dark mode">
+      <span class="theme-icon theme-icon-sun">☀</span>
+      <span class="theme-icon theme-icon-moon">☾</span>
+    </button>
+  </div>
+</header>
+
+<main class="app">
+
+  <!-- LEFT: INPUT -->
+  <aside class="form-panel">
+
+    <section class="step">
+      <h2><span class="step-no">01</span> How should this be generated? 🎛️</h2>
+      <label>Provider
+        <select id="f-provider">
+          <option value="none" selected>No AI — basic template, no key needed</option>
+          <option value="free">Free — no key needed (site owner's shared key)</option>
+          <option value="anthropic">Claude (Anthropic) — needs your API key</option>
+          <option value="groq">Groq — free tier, needs your API key</option>
+        </select>
+      </label>
+
+      <div class="key-box" id="key-box">
+        <label id="key-label">API key
+          <input type="password" id="f-apikey" placeholder="sk-ant-..." autocomplete="off" />
+        </label>
+        <button type="button" id="toggle-key-visibility" class="btn-ghost btn-ghost-small">Show</button>
+      </div>
+      <p class="hint warn" id="key-hint">
+        Kept in your browser's memory only for this tab — never saved to disk,
+        never sent anywhere except directly to the provider you picked.
+        Don't have one? <a id="key-help-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key here</a>.
+      </p>
+      <p class="hint" id="free-hint" hidden>
+        Uses the site owner's shared key with a small daily limit — nothing
+        for you to sign up for or paste in. If it says the daily limit's
+        been reached, try the Claude or Groq modes instead.
+      </p>
+      <p class="hint" id="template-hint" hidden>
+        Template mode builds your README from patterns in what you paste —
+        no AI call, no signup, completely free. It detects a
+        <code>package.json</code> if present, and turns lines starting with
+        <code>-</code>, <code>*</code>, <code>•</code>, or <code>✅</code>
+        into a features list. It does <strong>not</strong> read the
+        "Additional instructions" field below, and won't write original
+        prose the way the Claude/Groq modes do — for a genuinely detailed,
+        written-for-your-project README, use one of those instead.
+      </p>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-no">02</span> Tell it about your project 📝</h2>
+      <label>Project name (optional — I'll infer it if left blank)
+        <input type="text" id="f-name" placeholder="task-tracker-cli" />
+      </label>
+      <label>Paste your code, file structure, package.json, or just describe it
+        <textarea id="f-paste" rows="10" placeholder="Paste actual files, folder structure, or package.json for the best results — the more real detail you give it, the more specific and accurate the README will be. A short description alone will only produce a generic README."></textarea>
+      </label>
+
+      <p class="or-divider"><span>or</span></p>
+
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="f-files" multiple hidden
+          accept=".js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.cs,.go,.rb,.php,.rs,.swift,.kt,.html,.css,.json,.md,.txt,.yml,.yaml,.toml,.env,.sh" />
+        <div class="dropzone-content">
+          <span class="dropzone-emoji">📁</span>
+          <p><strong>Drop your project files here</strong><br />or <button type="button" id="browse-files-btn" class="link-btn">browse to choose</button></p>
+          <p class="dropzone-sub">Code, config, or text files — read locally, nothing uploads anywhere</p>
+        </div>
+      </div>
+      <div class="file-chip-list" id="file-chip-list"></div>
+
+      <label>Additional instructions (optional)
+        <input type="text" id="f-instructions" placeholder="e.g. make it more detailed, use a casual tone, add a roadmap section" />
+      </label>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-no">03</span> Screenshots 📸</h2>
+      <label>Add images
+        <input type="file" id="f-screenshots" accept="image/*" multiple />
+      </label>
+      <div class="thumb-grid" id="thumb-grid"></div>
+      <p class="hint">
+        These stay on your computer — nothing uploads anywhere. The README
+        will reference them by filename; you'll drop the actual image files
+        into a <code>screenshots/</code> folder next to your README when you
+        push to GitHub.
+      </p>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-no">04</span> What to include ✅</h2>
+      <label class="checkbox"><input type="checkbox" id="f-inc-install" checked /> Installation instructions</label>
+      <label class="checkbox"><input type="checkbox" id="f-inc-usage" checked /> Usage examples</label>
+      <label class="checkbox"><input type="checkbox" id="f-inc-features" checked /> Features list</label>
+      <label class="checkbox"><input type="checkbox" id="f-inc-contributing" /> Contributing section</label>
+      <label>License
+        <select id="f-license">
+          <option value="">None</option>
+          <option value="MIT">MIT</option>
+          <option value="Apache-2.0">Apache 2.0</option>
+          <option value="GPL-3.0">GPL 3.0</option>
+          <option value="BSD-3-Clause">BSD 3-Clause</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="mascot-row">
+      <svg id="mascot" viewBox="0 0 120 120" width="60" height="60" class="mascot mascot-idle">
+        <ellipse cx="60" cy="110" rx="26" ry="5" class="mascot-shadow" />
+        <g class="mascot-body-group">
+          <line x1="60" y1="20" x2="60" y2="10" stroke="var(--amber)" stroke-width="4" stroke-linecap="round"/>
+          <circle class="mascot-antenna" cx="60" cy="8" r="5" fill="var(--amber)" />
+          <rect x="18" y="20" width="84" height="72" rx="26" fill="var(--amber)" />
+          <circle class="eye" cx="45" cy="52" r="7" fill="#14161c"/>
+          <circle class="eye" cx="75" cy="52" r="7" fill="#14161c"/>
+          <path class="mouth mouth-idle" d="M46 68 Q60 76 74 68" stroke="#14161c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path class="mouth mouth-thinking" d="M48 70 L72 70" stroke="#14161c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path class="mouth mouth-happy" d="M42 64 Q60 88 78 64" stroke="#14161c" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path class="mouth mouth-sad" d="M46 76 Q60 64 74 76" stroke="#14161c" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+        <g class="sparkle sparkle-1"><text x="12" y="30" font-size="18">✨</text></g>
+        <g class="sparkle sparkle-2"><text x="90" y="24" font-size="14">✨</text></g>
+        <g class="sparkle sparkle-3"><text x="96" y="70" font-size="12">✨</text></g>
+      </svg>
+      <p class="mascot-speech" id="mascot-speech">ready when you are!</p>
+    </div>
+
+    <button type="button" id="generate-btn" class="btn-primary"><span class="btn-emoji">✨</span> Generate README</button>
+    <p class="hint" id="status-line"></p>
+
+  </aside>
+
+  <!-- RIGHT: PREVIEW -->
+  <section class="preview-panel">
+    <div class="file-window">
+      <div class="file-chrome">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="file-tab">README.md</span>
+        <span class="commit-meta" id="commit-meta">😴 not generated yet</span>
+      </div>
+      <div class="file-tabs">
+        <button class="tab active" data-view="preview">Preview</button>
+        <button class="tab" data-view="raw">Raw markdown</button>
+        <div class="spacer"></div>
+        <button class="tab-action" id="copy-btn">Copy</button>
+        <button class="tab-action tab-action-primary" id="download-btn">Download</button>
+      </div>
+      <div class="file-body">
+        <div id="preview-render" class="markdown-body">
+          <p class="empty-state">👋 Nothing here yet — paste some project details on the left and hit that big button!</p>
+        </div>
+        <textarea id="raw-render" class="raw-view" readonly spellcheck="false"></textarea>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  Runs entirely in your browser 🌐 — no backend, no data stored. AI modes use your own API key and count against your own usage; template mode is fully free. 🎉
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
